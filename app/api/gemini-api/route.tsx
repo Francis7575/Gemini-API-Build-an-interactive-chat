@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { log } from "console";
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -36,11 +35,10 @@ export async function GET(request: Request) {
     });
 
     const result = await chatSession.sendMessage(question);
-    
     // If the model responds with a result, return it to the client
     if (result && result.response && result.response.text) {
-      const modelResponse = result.response.text(); 
-      
+      const modelResponse = result.response.text();
+
       // Try to parse the response if it's a JSON string
       let cleanResponse = modelResponse;
       try {
@@ -60,7 +58,15 @@ export async function GET(request: Request) {
             { model: cleanResponse }
           ]
         }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "http://localhost:8081",
+            "Access-Control-Allow-Methods": "GET, POST",
+            "Access-Control-Allow-Headers": "Content-Type",
+          }
+        }
       );
     } else {
       return new Response(
